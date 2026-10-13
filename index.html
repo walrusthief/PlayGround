@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d0a06">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<title>Gates of the Sword Coast — 5e Pocket CRPG</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- ===== TITLE / CREATION / SCREENS ===== -->
+  <div id="screen-title" class="screen active">
+    <div class="title-art">⚔️</div>
+    <h1>GATES OF THE<br><span>SWORD COAST</span></h1>
+    <p class="subtitle">A Baldur's Gate–inspired pocket CRPG · D&amp;D 5e rules (SRD)</p>
+    <div class="title-features">
+      <span>🧝 4 races</span><span>🛡️ 5 classes</span><span>🎲 Real d20 5e</span><span>⏸️ RTwP combat</span><span>📱 Touch-first</span>
+    </div>
+    <button id="btn-new" class="btn-big">✨ New Game</button>
+    <button id="btn-continue" class="btn-big secondary hidden">📂 Continue</button>
+    <button id="btn-how" class="btn-big secondary">📖 How to Play</button>
+    <p class="fan-note">Unofficial fan homage. Uses D&amp;D 5e SRD mechanics. Not affiliated with Wizards of the Coast or Larian/Bioware.</p>
+  </div>
+
+  <div id="screen-how" class="screen">
+    <h2>📖 How to Play</h2>
+    <div class="how-body">
+      <p><b>Move:</b> tap ground to walk · or drag left <b>joystick</b>. Pinch-free auto camera.</p>
+      <p><b>Interact:</b> tap glowing NPC / enemy / loot. Selected hero shows ring.</p>
+      <p><b>Combat (RTwP):</b> real-time with pause — like BG1. 5e math underneath: <code>d20 + prof + mod vs AC</code>, crits, spell slots, death saves.</p>
+      <p><b>Actions:</b> bottom bar — Attack, Spells, Potion, Second Wind, Hide, Rest, Pause.</p>
+      <p><b>Party:</b> tap portraits to select. AI companions auto-attack.</p>
+      <p><b>Rests:</b> Short Rest spends Hit Dice · Long Rest needs inn/campfire.</p>
+      <p><b>Quests:</b> follow the Journal (📜). Talk to everyone with <b>!</b> or <b>?</b></p>
+      <p><b>Save:</b> auto-saves; Continue from title.</p>
+    </div>
+    <button id="btn-how-back" class="btn-big secondary">← Back</button>
+  </div>
+
+  <div id="screen-create" class="screen">
+    <h2>✨ Create Your Hero</h2>
+    <div class="create-grid">
+      <label>Hero name <input id="cc-name" maxlength="16" value="Asha" autocomplete="off"></label>
+      <div class="cc-row"><span>Race</span><div id="cc-races" class="chips"></div></div>
+      <div id="cc-race-desc" class="desc"></div>
+      <div class="cc-row"><span>Class</span><div id="cc-classes" class="chips"></div></div>
+      <div id="cc-class-desc" class="desc"></div>
+      <div class="cc-row"><span>Portrait</span><div id="cc-portraits" class="chips"></div></div>
+      <div class="cc-row"><span>Voice</span><div id="cc-voice" class="chips"></div></div>
+      <h3>Ability Scores <small>(point buy · <span id="cc-points">27</span> left)</small></h3>
+      <div id="cc-abilities"></div>
+      <h3>Background</h3>
+      <div id="cc-bg" class="chips"></div>
+      <div id="cc-summary" class="desc"></div>
+    </div>
+    <div class="create-foot">
+      <button id="btn-cc-back" class="btn-big secondary">← Back</button>
+      <button id="btn-cc-start" class="btn-big">⚔️ Begin in Candlekeep</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME HUD ===== -->
+  <div id="screen-game" class="screen">
+    <canvas id="game-canvas"></canvas>
+    <div id="hud-top">
+      <div id="party-bar"></div>
+      <div id="top-right">
+        <button id="btn-journal" class="icon-btn" title="Journal">📜<span id="journal-dot" class="dot hidden"></span></button>
+        <button id="btn-map" class="icon-btn" title="Travel">🗺️</button>
+        <button id="btn-sheet" class="icon-btn" title="Character">🧝</button>
+        <button id="btn-bag" class="icon-btn" title="Inventory">🎒</button>
+        <button id="btn-pause" class="icon-btn" title="Pause (Space)">⏸️</button>
+        <button id="btn-menu" class="icon-btn" title="Menu">☰</button>
+      </div>
+    </div>
+    <div id="zone-banner"><span id="zone-name"></span><small id="quest-tracker"></small></div>
+    <div id="combat-banner" class="hidden">⚔️ COMBAT — round <span id="round-num">1</span> <span id="init-order"></span></div>
+    <div id="toast-wrap"></div>
+    <div id="dmg-layer"></div>
+    <div id="hud-bottom">
+      <div id="joystick"><div id="stick"></div></div>
+      <div id="action-bar"></div>
+      <button id="btn-endturn" class="btn-end hidden">⏭ End</button>
+    </div>
+    <div id="combat-log" class="collapsed"><div id="log-head">🧾 Combat Log <span id="log-toggle">▲</span></div><div id="log-body"></div></div>
+  </div>
+
+  <!-- ===== PANELS ===== -->
+  <div id="panel" class="hidden"><div id="panel-card"><div id="panel-head"><span id="panel-title"></span><button id="panel-close">✕</button></div><div id="panel-body"></div></div></div>
+  <div id="dialog" class="hidden"><div id="dialog-card"><div id="dialog-name"></div><div id="dialog-text"></div><div id="dialog-opts"></div></div></div>
+  <div id="levelup-modal" class="hidden"><div id="levelup-card"><h2>🎉 Level Up!</h2><div id="levelup-body"></div><button id="levelup-ok" class="btn-big">Continue</button></div></div>
+  <div id="gameover" class="hidden"><div id="gameover-card"><h2>💀 TPK — Party Down</h2><p>The Sword Coast forgets another band of heroes… or does it?</p><button id="btn-reload" class="btn-big">↺ Reload autosave</button><button id="btn-totitle" class="btn-big secondary">Title screen</button></div></div>
+  <div id="victory" class="hidden"><div id="gameover-card"><h2>🏆 The Iron Throne Falls</h2><div id="victory-body"></div><button id="btn-again" class="btn-big">✨ New Game+</button></div></div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
